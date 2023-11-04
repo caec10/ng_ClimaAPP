@@ -10,7 +10,8 @@
     "lint": "ng lint",
     "e2e": "ng e2e",
     "predeploy": "ng build --configuration=production --base-href=/ng-weather/",
-    "deploy": "npx gh-pages -d dist/"
+    "deploy": "npx gh-pages -d dist/ --branch=gh-pages"
+
   },
   "private": true,
   "dependencies": {
