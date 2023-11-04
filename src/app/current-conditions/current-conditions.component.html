@@ -1,0 +1,9 @@
+<!-- current-conditions.component.html -->
+<div>
+  <app-tab
+    *ngFor="let location of currentConditionsByZip"
+    [location]="location"
+    [active]="true"
+    (closeTab)="onCloseTab($event)"
+  ></app-tab>
+</div>
