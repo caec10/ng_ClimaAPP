@@ -7,7 +7,8 @@
     "declaration": false,
     "moduleResolution": "node",
     "experimentalDecorators": true,
-    "target": "ES2022",
+    "target": "es5",
+    "module": "es2020",
     "typeRoots": [
       "node_modules/@types"
     ],
