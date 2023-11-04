@@ -5,12 +5,12 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
-    "build": "ng build --configuration=production --base-href=/ng_ClimaAPP/",
+    "build": "ng build --configuration=production --base-href=/ng-weather/",
     "test": "ng test",
     "lint": "ng lint",
     "e2e": "ng e2e",
-    "predeploy": "ng build --configuration=production --base-href=/ng_ClimaAPP/",
-    "deploy": "npx gh-pages -d dist/ng_ClimaAPP/"
+    "predeploy": "ng build --configuration=production --base-href=/ng-weather/",
+    "deploy": "npx gh-pages -d dist/"
   },
   "private": true,
   "dependencies": {
