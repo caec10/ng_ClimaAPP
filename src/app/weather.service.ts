@@ -34,34 +34,34 @@ export class WeatherService {
     console.log('Tiempo en milisegundos para hacer la petición', time);
   }
 
-  addCurrentConditions(zipcode: string): void {
-    if (!zipcode || zipcode.trim() === '') {
-      console.error('Código postal no válido', zipcode);
-      return;
-    }
-    debugger;
-    this.http.get<WeatherData>(`${WeatherService.URL}/weather?zip=${zipcode},us&units=imperial&APPID=${WeatherService.APPID}`)
-      .subscribe(
-        data => {
-          debugger;
-          if (!data || Object.keys(data).length === 0) {
-            console.log('Los datos recibidos están vacíos');
-            return;
-          }
-          debugger;
-          this.currentConditionsSubject.pipe(take(1)).subscribe(conditions => {
-            const updatedConditions = [...conditions, { zip: zipcode, data }];
-            this.currentConditionsSubject.next(updatedConditions);
+    addCurrentConditions(zipcode: string): void {
+      console.log("Inicio de agregar", zipcode);
+      if (!zipcode || zipcode.trim() === '') {
+        console.error('Código postal no válido', zipcode);
+        return;
+      }
+      debugger;
+      this.http.get<WeatherData>(`${WeatherService.URL}/weather?zip=${zipcode},us&units=imperial&APPID=${WeatherService.APPID}`)
+        .subscribe(
+          data => {
+            debugger;
+            if (!data || Object.keys(data).length === 0) {
+              console.log('Los datos recibidos están vacíos');
+              return;
+            }
+            debugger;
+            const updatedConditions = { zip: zipcode, data };
+            this.currentConditionsSubject.next([...this.currentConditionsSubject.value, updatedConditions]);
             console.log('Datos agregados:', updatedConditions);
-          });
-        },
-        error => {
-          console.error('Error en la solicitud HTTP:', error);
-          console.error('Mensaje de error:', error.message);
-        }
-      );
-  }
-  
+          },
+          error => {
+            console.error('Error en la solicitud HTTP:', error);
+            console.error('Mensaje de error:', error.message);
+          }
+        );
+        console.log("Fin de agregar", zipcode);
+    }
+    
 
   removeCurrentConditions(zipcode: string): void {
     const conditions = this.currentConditionsSubject.getValue();
@@ -126,8 +126,13 @@ export class WeatherService {
 
   refreshCurrentConditions(locations: string[]): void {
     if (locations && locations.length > 0) {
-      this.currentConditionsSubject.next([]);
-      locations.forEach(location => this.addCurrentConditions(location));
+      const currentConditions = this.currentConditionsSubject.getValue();
+      locations.forEach(location => {
+        if (!currentConditions.some(condition => condition.zip === location)) {
+          this.addCurrentConditions(location);
+        }
+      });
     }
   }
+  
 }

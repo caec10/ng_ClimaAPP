@@ -21,10 +21,15 @@
 
     // Agregar una nueva ubicación
     addLocation(zipcode: string): void {
-      this.locations.push(zipcode);
-      this.updateLocationsInLocalStorage();
-      this.emitLocationUpdate();
+      if (!this.locations.includes(zipcode)) { 
+        this.locations.push(zipcode);
+        this.updateLocationsInLocalStorage();
+        this.emitLocationUpdate();
+      } else {
+        console.log('El código postal ya está en la lista.');
+      }
     }
+    
 
     // Remover una ubicación existente
     removeLocation(zipcode: string): void {

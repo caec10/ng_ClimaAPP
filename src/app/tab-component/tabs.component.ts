@@ -40,7 +40,7 @@ export class TabComponent implements OnInit, AfterViewInit, OnDestroy {
     this.locations = this.locationService.locations;
     this.loadTabsData();
     this.weatherService.refreshCurrentConditions(this.locations);
-
+    console.log("inicio de datos");
     // Suscribirse a los cambios en el tiempo de caché
     this.timeSetSubscription = this.weatherService.timeSet$.subscribe((time: number) => {
       console.log('Nuevo tiempo de caché:', time);
