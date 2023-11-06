@@ -4,10 +4,6 @@ import { LocationService } from 'app/location.service';
 import { WeatherService } from '../weather.service';
 import { Subscription } from 'rxjs';
 
-interface TabInformation {
-  title: string;
-  data: ConditionsAndZip;
-}
 
 @Component({
   selector: 'app-tab',
@@ -18,7 +14,7 @@ export class TabComponent implements OnInit, AfterViewInit, OnDestroy {
   timeSetSubscription: Subscription | undefined;
   @ViewChild('tabContainer') tabContainer: ElementRef<HTMLElement> | undefined;
 
-  @Input() location: ConditionsAndZip | undefined;
+  @Input() location: ConditionsAndZip[] = [];
   @Input() active: boolean = false;
   @Output() closeTab: EventEmitter<string> = new EventEmitter<string>();
 
@@ -26,7 +22,7 @@ export class TabComponent implements OnInit, AfterViewInit, OnDestroy {
   tabWidth = 200;
   carouselWidth = 0;
   activeTab: number = 0;
-  tabsInfo: TabInformation[] = [];
+  tabsInfo: ConditionsAndZip[] = [];
   locations: string[] = [];
 
   constructor(
@@ -40,36 +36,34 @@ export class TabComponent implements OnInit, AfterViewInit, OnDestroy {
     this.locations = this.locationService.locations;
     this.loadTabsData();
     this.weatherService.refreshCurrentConditions(this.locations);
-    console.log("inicio de datos");
     // Suscribirse a los cambios en el tiempo de caché
     this.timeSetSubscription = this.weatherService.timeSet$.subscribe((time: number) => {
       console.log('Nuevo tiempo de caché:', time);
     });
   }
-
+  
   loadTabsData(): void {
-    // Suscribirse a los datos de las condiciones climáticas
     this.weatherService.currentConditions$.subscribe((conditions: ConditionsAndZip[]) => {
       if (conditions && conditions.length > 0) {
-        // Filtra y mapea los datos para las pestañas
-        this.tabsInfo = conditions
-          .filter(condition => condition !== undefined)
-          .map((condition, index) => {
-            return {
-              title: `Tab ${index + 1}`,
-              data: condition as ConditionsAndZip
-            };
-          });
-        this.cdRef.detectChanges();
+        this.tabsInfo = conditions.map((condition, index) => {
+          return {
+            zip: condition.zip,
+            data: condition.data
+          };
+        });
+        this.calculateCarouselWidth();
+        this.cdRef.detectChanges(); // Actualizar la vista
       }
+      console.log("datos desde el tabs", this.tabsInfo);
     });
   }
   
-  onCloseTab(): void {
-    if (this.location) {
-      this.closeTab.emit(this.location.zip);
-    }
+  
+  onCloseTab(zip: string): void {
+    this.tabsInfo = this.tabsInfo.filter(tab => tab.zip !== zip);
+    this.closeTab.emit(zip);
   }
+  
 
   changeTab(tabNumber: number): void {
     this.activeTab = tabNumber;

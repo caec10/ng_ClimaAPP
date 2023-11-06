@@ -9,10 +9,10 @@ import { map, take } from 'rxjs/operators';
 
 @Injectable()
 export class WeatherService {
-  static URL = 'http://api.openweathermap.org/data/2.5';
+  static URL = 'https://api.openweathermap.org/data/2.5';
   static APPID = '5a4b2d457ecbef9eb2a71e480b947604';
   static ICON_URL = 'https://raw.githubusercontent.com/udacity/Sunshine-Version-2/sunshine_master/app/src/main/res/drawable-hdpi/';
-
+  
   private _timeSetSubject: BehaviorSubject<number> = new BehaviorSubject<number>(7200000);
   private currentConditionsSubject: BehaviorSubject<ConditionsAndZip[]> = new BehaviorSubject<ConditionsAndZip[]>([]);
   public currentConditions$: Observable<ConditionsAndZip[]> = this.currentConditionsSubject.asObservable();
@@ -34,33 +34,41 @@ export class WeatherService {
     console.log('Tiempo en milisegundos para hacer la petición', time);
   }
 
-    addCurrentConditions(zipcode: string): void {
-      console.log("Inicio de agregar", zipcode);
-      if (!zipcode || zipcode.trim() === '') {
-        console.error('Código postal no válido', zipcode);
-        return;
-      }
-      debugger;
-      this.http.get<WeatherData>(`${WeatherService.URL}/weather?zip=${zipcode},us&units=imperial&APPID=${WeatherService.APPID}`)
-        .subscribe(
-          data => {
-            debugger;
-            if (!data || Object.keys(data).length === 0) {
-              console.log('Los datos recibidos están vacíos');
-              return;
-            }
-            debugger;
-            const updatedConditions = { zip: zipcode, data };
-            this.currentConditionsSubject.next([...this.currentConditionsSubject.value, updatedConditions]);
-            console.log('Datos agregados:', updatedConditions);
-          },
-          error => {
-            console.error('Error en la solicitud HTTP:', error);
-            console.error('Mensaje de error:', error.message);
-          }
-        );
-        console.log("Fin de agregar", zipcode);
+  addCurrentConditions(zipcode: string): void {
+    console.log("Inicio de agregar", zipcode);
+    if (!zipcode || zipcode.trim() === '') {
+      console.error('Código postal no válido', zipcode);
+      return;
     }
+    
+    this.http.get<WeatherData>(`${WeatherService.URL}/weather?zip=${zipcode},us&units=imperial&APPID=${WeatherService.APPID}`)
+      .subscribe(
+        data => {
+          if (!data || Object.keys(data).length === 0) {
+            console.log('Los datos recibidos están vacíos');
+            return;
+          }
+          const updatedConditions = { zip: zipcode, data };
+  
+          // Verificar si la condición ya existe en el array
+          const currentConditions = this.currentConditionsSubject.getValue();
+          const existingCondition = currentConditions.find(condition => condition.zip === zipcode);
+  
+          if (!existingCondition) {
+            this.currentConditionsSubject.next([...currentConditions, updatedConditions]);
+            console.log('Datos agregados:', updatedConditions);
+          } else {
+            console.log('La condición ya existe:', existingCondition);
+          }
+        },
+        error => {
+          console.error('Error en la solicitud HTTP:', error);
+          console.error('Mensaje de error:', error.message);
+        }
+      );
+    console.log("Fin de agregar", zipcode);
+  }
+  
     
 
   removeCurrentConditions(zipcode: string): void {

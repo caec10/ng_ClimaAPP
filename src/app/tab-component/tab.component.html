@@ -1,17 +1,11 @@
-<!-- tab.component.html -->
-
-<!-- Contenedor del carrusel de pestañas -->
 <div class="carousel-container">
   <button (click)="scrollLeft()" class="btn-scroll-left" [disabled]="activeTab === 0">Left</button>
 
-  <!-- Contenedor de las pestañas -->
   <div class="tabs-container" #tabContainer>
     <div class="tabs" [style.transform]="'translateX(' + -tabWidth * activeTab + 'px)'">
-      <!-- Lista de pestañas -->
       <h3 *ngFor="let tab of tabsInfo; let i = index" (click)="changeTab(i)" class="tab" [class.active]="activeTab === i">
-        <!-- Contenido de cada pestaña -->
-        {{ tab.data?.name }} ({{ tab.data?.zip }})
-        <span class="closeX" (click)="onCloseTab(tab.data.zip)">×</span>
+        {{ tab.data?.name }} ({{ tab.zip }})
+        <span class="closeX" (click)="onCloseTab(tab.zip)">×</span>
       </h3>
     </div>
   </div>
@@ -19,7 +13,6 @@
   <button (click)="scrollRight()" class="btn-scroll-right" [disabled]="activeTab === tabsInfo.length - 1">Right</button>
 </div>
 
-<!-- Contenido de la pestaña activa -->
 <div class="tab-container">
   <div *ngFor="let tab of tabsInfo; let i = index" class="tab-content" [class.active]="activeTab == i">
     <div *ngIf="activeTab == i" class="tab-section">
@@ -33,21 +26,17 @@
             - Min {{ tab.data.main.temp_min | number: '.0-0' }}
           </p>
           <div>
-            <!-- Entrada para configurar el tiempo de caché -->
             <input type="number" placeholder="Cache time in milliseconds" (input)="updateCacheTime($event.target.value)" />
           </div>
 
           <p>
-            <!-- Enlace para ver el pronóstico de 5 días -->
-            <a [routerLink]="['/forecast', tab.data.zip]">Show 5-day forecast for {{ tab.data.name }}</a>
+            <a [routerLink]="['/forecast', tab.zip]">Show 5-day forecast for {{ tab.data.name }}</a>
           </p>
         </div>
 
         <div class="tab-footer">
-          <!-- Imagen del clima -->
           <img *ngIf="tab.data.weather && tab.data.weather.length > 0" [src]="weatherService.getWeatherIcon(tab.data.weather[0]?.id)">
         </div>
-        
       </div>
     </div>
   </div>
