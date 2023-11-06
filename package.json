@@ -5,19 +5,19 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
-    "build": "ng build --configuration=production --base-href=/ng-weather/",
+    "build": "ng build",
     "test": "ng test",
     "lint": "ng lint",
     "e2e": "ng e2e",
-    "predeploy": "ng build --configuration=production --base-href=/ng-weather/",
-    "deploy": "npx gh-pages -d dist/"
-
+    "predeploy": "ng build",
+    "deploy": "ng deploy --base-href=https://caec10.github.io/ng_ClimaAPP/"
   },
   "private": true,
   "dependencies": {
     "@angular/common": "^16.2.5",
     "@angular/compiler": "^16.2.5",
     "@angular/core": "^16.2.5",
+    "@angular/fire": "^16.0.0",
     "@angular/forms": "^16.2.5",
     "@angular/platform-browser": "^16.2.5",
     "@angular/platform-browser-dynamic": "^16.2.5",
@@ -29,6 +29,7 @@
     "core-js": "^2.6.9",
     "cors": "^2.8.5",
     "express": "^4.17.3",
+    "firebase-tools": "^12.8.0",
     "gh-pages": "^6.0.0",
     "rxjs": "6.5.4",
     "tslib": "^2.0.0",
@@ -41,7 +42,7 @@
     "@angular/compiler-cli": "^16.2.5",
     "@types/jasmine": "~3.6.0",
     "@types/node": "^6.14.6",
-    "angular-cli-ghpages": "^0.6.2",
+    "angular-cli-ghpages": "^1.0.5",
     "blue-harvest": "^0.2.1",
     "jasmine": "~2.6.0",
     "jasmine-core": "~3.6.0",
