@@ -10,14 +10,16 @@ import { Forecast } from './forecast.type';
 })
 export class ForecastsListComponent {
 
-  zipcode: string;
-  forecast: Forecast;
+  zipcode: string; // Variable para almacenar el código postal
+  forecast: Forecast; // Variable para almacenar el pronóstico
 
   constructor(protected weatherService: WeatherService, private route: ActivatedRoute) {
+    // Suscripción a los cambios en los parámetros de la URL
     this.route.params.subscribe(params => {
-      this.zipcode = params['zipcode'];
+      this.zipcode = params['zipcode']; // Asignación del código postal de la URL
+      // Obtención del pronóstico del servicio de clima usando el código postal
       this.weatherService.getForecast(this.zipcode)
-        .subscribe(data => this.forecast = data);
+        .subscribe(data => this.forecast = data); // Almacenamiento del pronóstico recibido
     });
   }
 }

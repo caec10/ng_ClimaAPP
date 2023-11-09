@@ -17,6 +17,8 @@ import { TabComponent } from './tab-component/tabs.component';
 
 import { routing } from './app.routing';
 import { environment } from '../environments/environment';
+import { TabItemComponent } from './tab-component/tabs-item.component';
+import { TabHeaderComponent } from './tab-component/tabs-header.component';
 
 @NgModule({
   declarations: [
@@ -26,6 +28,8 @@ import { environment } from '../environments/environment';
     CurrentConditionsComponent,
     MainPageComponent,
     TabComponent,
+    TabItemComponent,
+    TabHeaderComponent,
   ],
   imports: [
     BrowserModule,
