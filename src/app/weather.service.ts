@@ -1,11 +1,11 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, BehaviorSubject } from 'rxjs';
+import { Observable, BehaviorSubject, throwError } from 'rxjs';
 import { WeatherData } from './current-conditions/current-conditions.type';
 import { ConditionsAndZip } from './conditions-and-zip.type';
 import { Forecast } from './forecasts-list/forecast.type';
 import { EventBusService } from './event-bus.service';
-import { map } from 'rxjs/operators';
+import {  map } from 'rxjs/operators';
 
 @Injectable()
 export class WeatherService {
@@ -24,10 +24,12 @@ export class WeatherService {
   public currentConditions$: Observable<ConditionsAndZip[]> = this.currentConditionsSubject.asObservable();
 
   constructor(private http: HttpClient, private eventBus: EventBusService) {
-    // Suscribe a la actualización de ubicaciones
+    this.loadInitialConditions(); // Cargar condiciones iniciales al iniciar el servicio
+
+    // Suscribirse a la actualización de ubicaciones
     this.eventBus.onLocationUpdate().subscribe((locations: string[]) => {
       if (locations && locations.length > 0) {
-        // Agrega las condiciones climáticas para cada ubicación
+        // Agregar las condiciones climáticas para cada ubicación
         locations.forEach(location => this.addCurrentConditions(location));
       }
     });
@@ -41,42 +43,110 @@ export class WeatherService {
   // Establece el tiempo personalizado de caché
   setCustomCacheTime(time: number): void {
     this._timeSetSubject.next(time);
-    console.log('Tiempo en milisegundos para hacer la petición', time);
   }
 
-  // Agrega las condiciones climáticas para un código postal dado
-  addCurrentConditions(zipcode: string): void {
-    // Realiza la solicitud HTTP para obtener los datos climáticos actuales
-    this.http.get<WeatherData>(`${WeatherService.URL}/weather?zip=${zipcode},us&units=imperial&APPID=${WeatherService.APPID}`)
-      .subscribe(
-        data => {
-          // Verifica si los datos recibidos son válidos
-          if (!data || Object.keys(data).length === 0) {
-            console.log('Los datos recibidos están vacíos');
-            return;
-          }
 
-          const updatedConditions = { zip: zipcode, data };
-          const currentConditions = this.currentConditionsSubject.getValue();
 
-          // Verifica si la condición ya existe en la lista
-          const existingCondition = currentConditions.find(condition => condition.zip === zipcode);
 
-          if (!existingCondition) {
-            // Añade las nuevas condiciones climáticas
-            this.currentConditionsSubject.next([...currentConditions, updatedConditions]);
+  // Método para cargar condiciones climáticas al iniciar la aplicación
+  private loadInitialConditions(): void {
+    const storedConditions = JSON.parse(localStorage.getItem('currentConditions') || '[]');
+    if (storedConditions.length > 0) {
+      this.currentConditionsSubject.next(storedConditions);
+    }
+  }
+  // Método para actualizar el almacenamiento local cada vez que hay cambios
+  private updateLocalStorage(conditions: ConditionsAndZip[]): void {
+    localStorage.setItem('currentConditions', JSON.stringify(conditions));
+  }
+
+  // Método para manejar errores de la solicitud HTTP
+  private handleError(error: any): Observable<never> {
+    console.error('Error en la solicitud HTTP:', error);
+    console.error('Mensaje de error:', error.message);
+    return new Observable<never>(observer => {
+      observer.error('Error en la solicitud HTTP');
+    });
+  }
+
+    // Obtener el tiempo del último intento para un código postal
+    private getLastAttemptTime(zipcode: string): number | null {
+      const key = `lastAttempt_${zipcode}`;
+      const storedTime = localStorage.getItem(key);
+      return storedTime ? parseInt(storedTime, 10) : null;
+    }
+  
+    // Establecer el tiempo del último intento para un código postal
+    private setLastAttemptTime(zipcode: string, time: number): void {
+      const key = `lastAttempt_${zipcode}`;
+      localStorage.setItem(key, time.toString());
+    }
+  
+
+
+    addCurrentConditions(zipcode: string): void {
+      // Verificar si ya hemos intentado obtener datos para este código postal recientemente
+      const lastAttemptTime = this.getLastAttemptTime(zipcode);
+      const currentTime = Date.now();
+      const timeSinceLastAttempt = currentTime - lastAttemptTime;
+  
+      if (lastAttemptTime && timeSinceLastAttempt < this._timeSetSubject.value) {
+        return;
+      }
+  
+      // Marcar el tiempo de este intento
+      this.setLastAttemptTime(zipcode, currentTime);
+  
+      // Realizar la solicitud HTTP para obtener los datos climáticos actuales
+      this.http
+        .get<WeatherData>(`${WeatherService.URL}/weather?zip=${zipcode},us&units=imperial&APPID=${WeatherService.APPID}`)
+        .subscribe(
+          (data) => {
+            // Verificar si los datos recibidos son válidos
+            if (!data || Object.keys(data).length === 0) {
+              console.log('Datos no válidos:', zipcode);
+              alert('Datos climáticos no encontrados');
+              return;  // No continuar si los datos no son válidos
+            }
+  
+            // Verificar si el código postal ya está agregado
+            const currentConditions = this.currentConditionsSubject.getValue();
+            const existingCondition = currentConditions.find((condition) => condition.zip === zipcode);
+  
+            if (existingCondition) {
+              console.log('El código postal ya está agregado:', existingCondition);
+              // Emitir evento de código postal existente
+              this.eventBus.emitLocationExists(zipcode);
+              return;
+            }
+  
+            const updatedConditions = { zip: zipcode, data };
+  
+            // Añadir las nuevas condiciones climáticas
+            const newConditions = [...currentConditions, updatedConditions];
+            this.currentConditionsSubject.next(newConditions);
+            this.updateLocalStorage(newConditions); // Actualizar almacenamiento local
             console.log('Datos agregados:', updatedConditions);
-          } else {
-            console.log('La condición ya existe:', existingCondition);
+          },
+          (error) => {
+            // Manejar el error aquí si es necesario
+            console.error('Error al agregar las condiciones climáticas:', error);
+            alert('Error al obtener datos climáticos');
+  
+            // En caso de error, eliminar el código postal del localStorage
+            const currentConditions = this.currentConditionsSubject.getValue();
+            const indexToRemove = currentConditions.findIndex((condition) => condition.zip === zipcode);
+            if (indexToRemove !== -1) {
+              currentConditions.splice(indexToRemove, 1);
+              this.currentConditionsSubject.next(currentConditions);
+              this.updateLocalStorage(currentConditions);
+            }
           }
-        },
-        error => {
-          console.error('Error en la solicitud HTTP:', error);
-          console.error('Mensaje de error:', error.message);
-        }
-      );
-  }
+        );
+    }
 
+  
+  
   // Elimina las condiciones climáticas para un código postal específico
   removeCurrentConditions(zipcode: string): void {
     const conditions = this.currentConditionsSubject.getValue();
@@ -85,7 +155,6 @@ export class WeatherService {
     if (index !== -1) {
       conditions.splice(index, 1);
       this.currentConditionsSubject.next(conditions);
-      console.log('Datos eliminados:', conditions);
     }
   }
 

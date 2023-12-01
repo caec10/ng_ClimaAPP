@@ -26,7 +26,6 @@ export class CurrentConditionsComponent implements OnInit, OnDestroy {
     this.conditionsSubscription = this.weatherService.currentConditions$.subscribe((data: ConditionsAndZip[]) => {
       // Actualiza las condiciones climáticas al recibir nuevos datos
         this.currentConditionsByZip = data;
-        console.log('Datos actualizados:', this.currentConditionsByZip);
     });
   }
 

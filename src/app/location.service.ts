@@ -26,7 +26,7 @@
         this.updateLocationsInLocalStorage();
         this.emitLocationUpdate();
       } else {
-        console.log('El código postal ya está en la lista.');
+        this.emitLocationExists(zipcode); // Emitir evento de código postal existente
       }
     }
     
@@ -50,4 +50,11 @@
     private emitLocationUpdate(): void {
       this.eventBus.emitLocationUpdate(this.locations);
     }
+
+
+    private emitLocationExists(zipcode: string): void {
+      this.eventBus.emitLocationExists(zipcode);
+    }
+
+
   }

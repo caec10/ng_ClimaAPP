@@ -1,8 +1,9 @@
-import { Component, Input, Output, EventEmitter, ViewChild, ElementRef, AfterViewInit, OnInit, OnDestroy, ChangeDetectorRef, ContentChildren, QueryList, AfterContentInit } from '@angular/core';
+import { Component, Input, Output, EventEmitter, ViewChild, ElementRef, AfterViewInit, OnInit, OnDestroy, ChangeDetectorRef, ContentChildren, QueryList, AfterContentInit, HostListener } from '@angular/core';
 import { ConditionsAndZip } from 'app/conditions-and-zip.type';
 import { LocationService } from 'app/location.service';
 import { WeatherService } from '../weather.service';
 import { Subscription } from 'rxjs';
+import { Location } from '@angular/common';
 import { TabItemComponent } from './tabs-item.component';
 import { TabHeaderComponent } from './tabs-header.component';
 
@@ -33,7 +34,8 @@ export class TabComponent implements OnInit, AfterViewInit, AfterContentInit, On
   constructor(
     private locationService: LocationService,
     private weatherService: WeatherService,
-    private cdRef: ChangeDetectorRef
+    private cdRef: ChangeDetectorRef,
+    private locationx: Location
   ) {}
 
   // Método que se ejecuta al inicializar el componente
@@ -42,7 +44,6 @@ export class TabComponent implements OnInit, AfterViewInit, AfterContentInit, On
     this.loadTabsData();
     this.weatherService.refreshCurrentConditions(this.locations);
     this.timeSetSubscription = this.weatherService.timeSet$.subscribe((time: number) => {
-      console.log('Nuevo tiempo de caché:', time);
     });
   }
 
@@ -56,10 +57,14 @@ export class TabComponent implements OnInit, AfterViewInit, AfterContentInit, On
             data: condition.data
           };
         });
-        this.calculateCarouselWidth(); // Calcular el ancho del carrusel
+        // Calcular el ancho del carrusel
+        this.calculateCarouselWidth();
+         // Establecer el tab activo como el último agregado
+        this.activeTab = this.tabsInfo.length - 1;
+        // Actualizar la visibilidad de las pestañas
+        this.updateTabs();
         this.cdRef.detectChanges();
       }
-      console.log("datos desde el tabs", this.tabsInfo);
     });
   }
 
@@ -77,20 +82,45 @@ export class TabComponent implements OnInit, AfterViewInit, AfterContentInit, On
 
   // Métodos que se ejecutan después de la inicialización de la vista
   ngAfterViewInit(): void {
-    this.setTabContainerWidth();
-    this.calculateCarouselWidth();
+    setTimeout(() => {
+      this.setTabContainerWidth();
+      this.calculateCarouselWidth();
+      this.updateActiveTabFromUrl(); 
+    });
   }
-
   // Métodos que se ejecutan después de la inicialización del contenido
   ngAfterContentInit(): void {
     if (this.tabs) {
       this.tabs.changes.subscribe((items: QueryList<TabItemComponent>) => {
-        console.log('Se detectaron cambios en los elementos TabItemComponent:', items);
         this.calculateCarouselWidth();
       });
       this.calculateCarouselWidth();
     }
   }
+
+
+  // Agrega este método para escuchar los cambios en el historial de navegación
+  @HostListener('window:popstate', ['$event'])
+  onPopState(event: any): void {
+    this.updateActiveTabFromUrl();
+  }
+
+  // Agrega este método para actualizar la pestaña activa desde la URL
+  updateActiveTabFromUrl(): void {
+    const urlSegments = this.locationx.path().split('/');
+    const zipcodeSegmentIndex = urlSegments.indexOf('zipcode');
+
+    if (zipcodeSegmentIndex !== -1 && zipcodeSegmentIndex + 1 < urlSegments.length) {
+      const zipcode = urlSegments[zipcodeSegmentIndex + 1];
+      const tabIndex = this.tabsInfo.findIndex(tab => tab.zip === zipcode);
+
+      if (tabIndex !== -1) {
+        this.activeTab = tabIndex;
+        this.updateTabs();
+      }
+    }
+  }
+
 
   // Establecer el ancho del contenedor de las pestañas
   setTabContainerWidth(): void {
