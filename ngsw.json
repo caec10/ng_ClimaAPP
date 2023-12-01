@@ -1,6 +1,6 @@
 {
   "configVersion": 1,
-  "timestamp": 1701403229056,
+  "timestamp": 1701404124221,
   "index": "https://caec10.github.io/ng_ClimaAPP/index.html",
   "assetGroups": [
     {
@@ -13,7 +13,7 @@
       "urls": [
         "https://caec10.github.io/ng_ClimaAPP/favicon.ico",
         "https://caec10.github.io/ng_ClimaAPP/index.html",
-        "https://caec10.github.io/ng_ClimaAPP/main.d1e2602b2744f7f1.js",
+        "https://caec10.github.io/ng_ClimaAPP/main.2f250891f789041f.js",
         "https://caec10.github.io/ng_ClimaAPP/polyfills.1aa18cd3903be6e2.js",
         "https://caec10.github.io/ng_ClimaAPP/runtime.8ec97a0ffe2636bf.js",
         "https://caec10.github.io/ng_ClimaAPP/styles.5a844b9747babb89.css"
@@ -66,8 +66,8 @@
     "https://caec10.github.io/ng_ClimaAPP/assets/icons/icon-96x96.png": "3914125a4b445bf111c5627875fc190f560daa41",
     "https://caec10.github.io/ng_ClimaAPP/assets/weather.json": "5ce53747ac7b830cab8740514bba77459926438a",
     "https://caec10.github.io/ng_ClimaAPP/favicon.ico": "84161b857f5c547e3699ddfbffc6d8d737542e01",
-    "https://caec10.github.io/ng_ClimaAPP/index.html": "345410ba5d9420118cfe022e53e0aa03c2b22279",
-    "https://caec10.github.io/ng_ClimaAPP/main.d1e2602b2744f7f1.js": "76b879377e5bda4e3d8da672858e02132fad20a8",
+    "https://caec10.github.io/ng_ClimaAPP/index.html": "e0bad2006840f5e6c060c14b9e214f674e9f0615",
+    "https://caec10.github.io/ng_ClimaAPP/main.2f250891f789041f.js": "3a82e756911cb388c23c09c3b1b6a327c77421ab",
     "https://caec10.github.io/ng_ClimaAPP/polyfills.1aa18cd3903be6e2.js": "3f1f560223639acff1549d399e1c3f07373da5ba",
     "https://caec10.github.io/ng_ClimaAPP/runtime.8ec97a0ffe2636bf.js": "b2f1671c077760a4b0bac09ad76c6e9e9749cc2b",
     "https://caec10.github.io/ng_ClimaAPP/styles.5a844b9747babb89.css": "a4c4de54f0bacd4e7ff58c0837d3dd06ba3322b8"
